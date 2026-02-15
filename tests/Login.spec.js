@@ -17,7 +17,7 @@ test.describe ('Login Form', () => {
         // Create new instance of LoginPage for each test // Ensures test isolation and clean state
         loginPage = new LoginPage(page); 
         // Navigate to the login page to ensure every test starts from the same state
-        await page.goto(URLs.loginPageLink); 
+        await page.goto(URLs.baseURL); 
     });
 
     // Positive test: successful login with valid credentials

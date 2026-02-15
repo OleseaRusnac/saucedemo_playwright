@@ -26,7 +26,7 @@ test.describe('Inventory Page Tests', () => {
         checkoutPage = new CheckoutPage(page);
 
         // Navigate to the login page to ensure every test starts from the same state
-        await page.goto(URLs.loginPageLink);
+        await page.goto(URLs.baseURL);
         // Perform login with valid credentials from TestData
         await loginPage.login(TestData.validUser.username, TestData.validUser.password); 
         // Verify successful login by checking URL
