@@ -43,4 +43,13 @@ export class InventoryPage {
         // Convert expected number to string and verify badge text matches
         await expect(this.cartBadge).toHaveText(expectedCount.toString());
     }
+
+    // Method to remove a specific product from the cart
+    async removeProduct(productName) {
+        const formattedName = productName.toLowerCase().replace(/ /g, '-');
+        // Create dynamic locator for the Remove button
+        const removeButton = this.page.locator(`[data-test="remove-${formattedName}"]`);
+        // Click the Remove button
+        await removeButton.click();
+    }
 }

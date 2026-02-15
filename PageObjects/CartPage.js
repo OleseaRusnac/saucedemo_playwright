@@ -12,7 +12,7 @@ export class CartPage {
         // Locator for "Checkout" button inside cart page
         this.checkoutButton = page.locator('[data-test="checkout"]');
         // Locator for all cart items (each product added to cart)
-        this.cartItems = page.locator('.cart_item')
+        this.cartItems = page.locator('.cart_item');
     }
 
     // Method to open the cart page

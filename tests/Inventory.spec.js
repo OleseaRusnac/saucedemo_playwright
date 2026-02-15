@@ -83,4 +83,31 @@ test.describe('Inventory Page Tests', () => {
         // Verify confirmation
         await checkoutPage.verifyOrderCompleted();
     });
+
+    // Test case: Remove item from inventory page
+    test('Remove item from inventory page', async () => {
+        // Add products to cart using product name
+        await inventoryPage.addItemToCartByName('Sauce Labs Onesie');
+        await inventoryPage.addItemToCartByName('Sauce Labs Fleece Jacket');
+        // Remove item
+        await inventoryPage.removeProduct('Sauce Labs Onesie');
+        // Verify cart badge shows correct quantity (1 item)
+        await inventoryPage.verifyCartBadgeCount(1);
+    });
+
+    // Test case: Remove item from cart page
+    test('Remove item from cart page', async() => {
+        // Add products to cart using product name
+        await inventoryPage.addItemToCartByName('Sauce Labs Onesie');
+        await inventoryPage.addItemToCartByName('Sauce Labs Fleece Jacket');
+        // Open cart
+        await cartPage.openCart();
+        // Verify product is present in cart
+        await cartPage.verifyItemInCart('Sauce Labs Onesie');
+        await cartPage.verifyItemInCart('Sauce Labs Fleece Jacket');
+        // Remove item from cart
+        await inventoryPage.removeProduct('Sauce Labs Onesie');
+        // Verify cart badge shows correct quantity (1 item)
+        await inventoryPage.verifyCartBadgeCount(1);
+    })
 });
