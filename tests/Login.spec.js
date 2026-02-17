@@ -1,23 +1,21 @@
 // Import Playwright test runner and assertion library
-import {test, expect} from '@playwright/test'
-// Import centralized URLs configuration
-import { URLs } from '../Common/URLs';
-// Import test data (valid and invalid users)
-import { TestData } from '../Common/TestData';
-// Import Login Page Object class
-import { LoginPage } from '../PageObjects/LoginPage';
+import { test, expect } from '@playwright/test';
+// Import reusable login setup function
+import { initLogin } from './testSetup';
 
-// Group related login tests under a single describe block
-test.describe ('Login Form', () => {
-    // Variable to store LoginPage instance // Declared here to be accessible in all tests within this describe block
-    let loginPage; 
-    
-    // Hook that runs before each test case
-    test.beforeEach(async ({ page }) => { 
-        // Create new instance of LoginPage for each test // Ensures test isolation and clean state
-        loginPage = new LoginPage(page); 
-        // Navigate to the login page to ensure every test starts from the same state
-        await page.goto(URLs.baseURL); 
+// Group all login-related test cases under one suite
+test.describe('Login Form', () => {
+    // Declare variables to store LoginPage instance and TestData
+    let loginPage;
+    let TestData;
+
+    // Hook that runs before each test case in this suite
+    test.beforeEach(async ({ page }) => {
+        // Call initLogin utility function to:
+        // 1. Navigate to base URL
+        // 2. Initialize LoginPage object
+        // 3. Return LoginPage and TestData for use in tests
+        ({ loginPage, TestData } = await initLogin(page));
     });
 
     // Positive test: successful login with valid credentials

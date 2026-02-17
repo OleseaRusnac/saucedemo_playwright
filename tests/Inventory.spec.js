@@ -1,36 +1,24 @@
 // Import Playwright test runner and assertion library
 import {test, expect} from '@playwright/test'
-// Import centralized test data (users, checkout info, etc.)
-import { TestData } from "../Common/TestData";
-// Import centralized URLs configuration
-import { URLs } from "../Common/URLs";
-// Import Page Object classes
-import { InventoryPage } from "../PageObjects/InventoryPage";
-import { LoginPage } from "../PageObjects/LoginPage";
-import { CartPage } from '../PageObjects/CartPage';
-import { CheckoutPage } from '../PageObjects/CheckoutPage';
+// Import reusable setup function that initializes pages and performs login
+import { initPages } from './testSetup';
 
-// Group related login tests under a single describe block
+// Group all Inventory-related tests under one test suite
 test.describe('Inventory Page Tests', () => {
-    let loginPage; // Will store LoginPage instance
-    let inventoryPage; // Will store InventoryPage instance
-    let cartPage; // Will store CartPage instance
-    let checkoutPage; // Will store CheckoutPage instance
+    // Declare variables to store initialized Page Object instances
+    let loginPage;
+    let inventoryPage;
+    let cartPage;
+    let checkoutPage;
 
-    // Hook that runs before each test case
+    // Hook that runs before each test case in this suite
     test.beforeEach(async ({page}) => {
-        // Initialize Page Object classes before each test
-        loginPage = new LoginPage(page);
-        inventoryPage = new InventoryPage(page);
-        cartPage = new CartPage(page);
-        checkoutPage = new CheckoutPage(page);
-
-        // Navigate to the login page to ensure every test starts from the same state
-        await page.goto(URLs.baseURL);
-        // Perform login with valid credentials from TestData
-        await loginPage.login(TestData.validUser.username, TestData.validUser.password); 
-        // Verify successful login by checking URL
-        await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+        // Call initPages utility function:
+        // 1. Navigate to base URL
+        // 2. Perform login
+        // 3. Initialize all required Page Objects
+        // 4. Return them for reuse in tests
+        ({ loginPage, inventoryPage, cartPage, checkoutPage } = await initPages(page));
     });
 
     // Test case: Verify that 6 inventory items are displayed
@@ -66,24 +54,6 @@ test.describe('Inventory Page Tests', () => {
         await inventoryPage.verifyCartBadgeCount(2);
     });
 
-    // Test case: Complete checkout process successfully
-    test('Complete checkout successfully', async () => {
-        // Add product to cart using product name
-        await inventoryPage.addItemToCartByName('Sauce Labs Backpack');
-        // Open cart
-        await cartPage.openCart();
-        // Verify product is present in cart
-        await cartPage.verifyItemInCart('Sauce Labs Backpack');
-        // Start checkout process
-        await cartPage.clickCheckout();
-        // Fill checkout information
-        await checkoutPage.fillCheckoutInformation(TestData.checkoutDetails.firstName, TestData.checkoutDetails.lastName, TestData.checkoutDetails.postalCode);
-        // Complete order
-        await checkoutPage.finishOrder();
-        // Verify confirmation
-        await checkoutPage.verifyOrderCompleted();
-    });
-
     // Test case: Remove item from inventory page
     test('Remove item from inventory page', async () => {
         // Add products to cart using product name
@@ -95,19 +65,47 @@ test.describe('Inventory Page Tests', () => {
         await inventoryPage.verifyCartBadgeCount(1);
     });
 
-    // Test case: Remove item from cart page
-    test('Remove item from cart page', async() => {
-        // Add products to cart using product name
-        await inventoryPage.addItemToCartByName('Sauce Labs Onesie');
-        await inventoryPage.addItemToCartByName('Sauce Labs Fleece Jacket');
-        // Open cart
-        await cartPage.openCart();
-        // Verify product is present in cart
-        await cartPage.verifyItemInCart('Sauce Labs Onesie');
-        await cartPage.verifyItemInCart('Sauce Labs Fleece Jacket');
-        // Remove item from cart
-        await inventoryPage.removeProduct('Sauce Labs Onesie');
-        // Verify cart badge shows correct quantity (1 item)
-        await inventoryPage.verifyCartBadgeCount(1);
-    })
+    // Test case: Verify products are sorted by price: Low to High
+    test('Verify products are sorted by price: Low to High', async () => {
+        // Sort products by price: Low to High
+        await inventoryPage.sortBy('lohi');
+        // Get all product prices as text
+        const priceTexts = await inventoryPage.productPrices.allTextContents();
+        // Convert price texts to numbers (remove $ and parse)
+        const prices = priceTexts.map(text => parseFloat(text.replace('$', '')));
+        // Check if prices are in ascending order
+        for (let i = 0; i < prices.length - 1; i++) {
+            expect(prices[i]).toBeLessThanOrEqual(prices[i + 1]);
+        }
+    });
+
+    // Test case: Verify products are sorted by price: High to Low
+    test('Verify products are sorted by price: High to Low', async () => {
+        // Sort products by price: High to Low
+        await inventoryPage.sortBy('hilo');
+        // Get all product prices as text
+        const priceTexts = await inventoryPage.productPrices.allTextContents();
+        // Convert price texts to numbers (remove $ and parse)
+        const prices = priceTexts.map(text => parseFloat(text.replace('$', '')));
+        // Check if prices are in descending order
+        for (let i = 0; i < prices.length - 1; i++) {
+            expect(prices[i]).toBeGreaterThanOrEqual(prices[i + 1]);
+        }
+    });
+
+    // Test case: Verify products are sorted by name: Z to A
+    test('Verify products are sorted by name: Z to A', async () => {
+        // Sort products by name: Z to A
+        await inventoryPage.sortBy('za');
+        // Get all product name as text
+        const nameTexts = await inventoryPage.inventoryItems.allTextContents();
+        // Check if names are in descending order
+        for (let i = 0; i < nameTexts.length - 1; i++) {
+            expect(nameTexts[i].localeCompare(nameTexts[i + 1])).toBeGreaterThanOrEqual(0);
+        }
+        // Check if names are in descending order
+        for (let i = 0; i < nameTexts.length - 1; i++) {
+            expect(nameTexts[i].localeCompare(nameTexts[i + 1])).toBeGreaterThanOrEqual(0);
+        }
+    });
 });

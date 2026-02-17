@@ -11,7 +11,11 @@ export class InventoryPage {
         // Locator for all inventory item description blocks (each product container)
         this.inventoryItems = page.locator('[data-test="inventory-item-description"]'); 
         // Locator for shopping cart badge showing number of added items
-        this.cartBadge = page.locator('[data-test="shopping-cart-badge"]'); 
+        this.cartBadge = page.locator('[data-test="shopping-cart-badge"]');
+        // Locator for product sorting dropdown 
+        this.sortDropdown = page.locator('[data-test="product-sort-container"]');
+        // Locator for product price elements (used for sorting verification)
+        this.productPrices = page.locator('.inventory_item_price');
     }
 
     // Method to return total number of products displayed on inventory page
@@ -51,5 +55,17 @@ export class InventoryPage {
         const removeButton = this.page.locator(`[data-test="remove-${formattedName}"]`);
         // Click the Remove button
         await removeButton.click();
+    }
+
+    // Method to sort products by a specific criteria (e.g., price, name)
+    async sortBy(value) {
+        await this.sortDropdown.selectOption(value);
+    }
+
+    // Method to get all product prices as an array of numbers (used for sorting verification)
+    async getAllPrices() {
+        // Get all price elements and extract their text content
+        const priceElements = await this.productPrices.allTextContents();
+        return priceElements.map(price => parseFloat(price.replace('$', '')));
     }
 }

@@ -13,6 +13,8 @@ export class CartPage {
         this.checkoutButton = page.locator('[data-test="checkout"]');
         // Locator for all cart items (each product added to cart)
         this.cartItems = page.locator('.cart_item');
+        // Locator for continue shopping button
+        this.continueShoppingButton = page.locator('[id="continue-shopping"]');
     }
 
     // Method to open the cart page
@@ -33,5 +35,11 @@ export class CartPage {
     async clickCheckout() {
         // Click the Checkout button to start checkout process
         await this.checkoutButton.click();
+    }
+
+    // Method to continue shopping (navigate back to inventory)
+    async continueShopping(){
+        // Click the Continue Shopping
+        await this.continueShoppingButton.click();
     }
 }
